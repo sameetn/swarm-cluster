@@ -40,7 +40,6 @@ Vagrant.configure("2") do |config|
         vb.memory = 1024
         vb.check_guest_additions = false
         vb.functional_vboxsf     = false
-        # vb.linked_clone = true if Vagrant::VERSION =~ /^1.8/
       end
       n.vm.provision :shell, inline: "docker swarm join --listen-addr 10.100.198.20#{i}:2377 10.100.198.200:2377"
     end
