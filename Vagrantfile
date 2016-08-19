@@ -1,8 +1,8 @@
 # Define the common script for installing docker
 $script = <<SCRIPT
 echo "Installing Docker..."
-apt-get update
-apt-get install curl -y
+apt-get -q -y update
+apt-get install curl -y -q
 curl -fsSL https://test.docker.com/ | sh
 echo "Completed Installing Docker"
 SCRIPT
