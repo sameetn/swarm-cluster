@@ -1,12 +1,12 @@
 # Define the common script for installing docker
-$script = <<SCRIPT
+$setup_docker = <<SETUP_DOCKER
   echo "Installing Docker..."
   apt-get -q -y update
   apt-get install curl -y -q
   curl -fsSL https://get.docker.com/ | sh > /dev/null
   echo "Completed Installing Docker"
   usermod -aG docker vagrant
-SCRIPT
+SETUP_DOCKER
 
 # Script to startup and configure vault
 $setup_vault = <<VAULT
@@ -42,16 +42,16 @@ Vagrant.configure("2") do |config|
     m.vm.box_check_update = false
     m.vm.hostname = "swarm-master"
     m.vm.network "private_network", ip: "10.100.198.200"
-    m.vm.provision :shell, inline: $script, privileged: true
     m.vm.provider :virtualbox do |vb|
       vb.memory = 512
       vb.check_guest_additions = false
       vb.functional_vboxsf     = false
     end
+    m.vm.provision :shell, inline: $setup_docker, privileged: true
     m.vm.provision :shell, inline: "docker swarm init --listen-addr 10.100.198.200:2377 --advertise-addr 10.100.198.200:2377"
     m.vm.provision :shell, inline: "docker run -it -d -p 5000:5000 -e HOST=swarm-master -e PORT=5000 -v /var/run/docker.sock:/var/run/docker.sock manomarks/visualizer"
     m.vm.provision :shell, inline: $setup_vault, privileged: true
-    m.vm.provision :shell, inline: "/opt/vault/vault server -dev -dev-listen-address=10.100.198.200:8200 &"
+    m.vm.provision :shell, inline: "docker run -e 'VAULT_DEV_LISTEN_ADDRESS=10.100.198.200:8200' vault"
     m.vm.provision :shell, inline: $store_worker_token
   end
 
@@ -62,12 +62,12 @@ Vagrant.configure("2") do |config|
       n.vm.box_check_update = false
       n.vm.hostname =  "swarm-node-#{i}"
       n.vm.network "private_network", ip: "10.100.198.20#{i}"
-      n.vm.provision :shell, inline: $script, privileged: true
       n.vm.provider :virtualbox do |vb|
         vb.memory = 1024
         vb.check_guest_additions = false
         vb.functional_vboxsf     = false
       end
+      n.vm.provision :shell, inline: $setup_docker, privileged: true
       n.vm.provision :shell, inline: $setup_vault, privileged: true
       n.vm.provision :shell, inline: $join_cluster
     end
