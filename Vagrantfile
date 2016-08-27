@@ -14,22 +14,16 @@ $setup_vault = <<VAULT
   mkdir -p /opt/vault 
   cd /opt/vault
   echo "Current directory is `pwd`"
-  wget https://releases.hashicorp.com/vault/0.6.0/vault_0.6.0_linux_amd64.zip
+  wget -nv https://releases.hashicorp.com/vault/0.6.0/vault_0.6.0_linux_amd64.zip
   apt-get install -y -q unzip
   unzip /opt/vault/vault_0.6.0_linux_amd64.zip
+  /opt/vault/vault auth -address=http://10.100.198.200:8200 swarm-join
 VAULT
 
 # Store the worker token in the cluster
 $store_worker_token = <<STORE_WORKER_TOKEN
   /opt/vault/vault write -address=http://10.100.198.200:8200 secret/worker-token value=`docker swarm join-token -q worker`
 STORE_WORKER_TOKEN
-
-# Join the swarm cluster
-$join_cluster = <<JOIN_CLUSTER
-  docker swarm join --advertise-addr 10.100.198.20#{i}:2377 10.100.198.200:2377 \
-    --token `/opt/vault/vault read -address=http://10.100.198.200:8200 -field=value secret/worker-token`
-JOIN_CLUSTER
-
 
 Vagrant.configure("2") do |config|
 
@@ -49,10 +43,10 @@ Vagrant.configure("2") do |config|
     end
     m.vm.provision :shell, inline: $setup_docker, privileged: true
     m.vm.provision :shell, inline: "docker swarm init --listen-addr 10.100.198.200:2377 --advertise-addr 10.100.198.200:2377"
-    m.vm.provision :shell, inline: "docker run -it -d -p 5000:5000 -e HOST=swarm-master -e PORT=5000 -v /var/run/docker.sock:/var/run/docker.sock manomarks/visualizer"
+    m.vm.provision :shell, inline: "docker run -d -p 8200:8200 --name=dev-vault -e 'VAULT_DEV_ROOT_TOKEN_ID=swarm-join' vault"
     m.vm.provision :shell, inline: $setup_vault, privileged: true
-    m.vm.provision :shell, inline: "docker run -e 'VAULT_DEV_LISTEN_ADDRESS=10.100.198.200:8200' vault"
     m.vm.provision :shell, inline: $store_worker_token
+    m.vm.provision :shell, inline: "docker run -it -d -p 5000:5000 -e HOST=10.100.198.200 -e PORT=5000 -v /var/run/docker.sock:/var/run/docker.sock manomarks/visualizer"
   end
 
   # # Configure the swarm nodes
@@ -69,7 +63,7 @@ Vagrant.configure("2") do |config|
       end
       n.vm.provision :shell, inline: $setup_docker, privileged: true
       n.vm.provision :shell, inline: $setup_vault, privileged: true
-      n.vm.provision :shell, inline: $join_cluster
+      n.vm.provision :shell, inline: "docker swarm join --advertise-addr 10.100.198.20#{i}:2377 10.100.198.200:2377 --token `/opt/vault/vault read -address=http://10.100.198.200:8200 -field=value secret/worker-token`"
     end
   end
 
