@@ -1,0 +1,1 @@
+vagrant ssh swarm-master -c 'docker service create --replicas 10 --name emp_dir --update-delay 5s --update-parallelism 2 sameetn/directory-react-nodejs'
