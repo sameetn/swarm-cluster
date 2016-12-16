@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-[] source ./settings.sh
+# Run the settings for DigitalOcean
+[ -f ~/bin/settings_do.sh ] && source ~/bin/settings_do.sh
 swarm_nodes="swarm-node-1 swarm-node-2"
 
 echo "Creating the master"
