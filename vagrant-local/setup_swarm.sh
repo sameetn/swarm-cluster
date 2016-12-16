@@ -13,7 +13,13 @@ join_token=$(docker-machine ssh swarm-master docker swarm join-token -q worker)
 echo "Join token is ${join_token}"
 
 # Setup the portainer management
-docker run -d -p 9000:9000 portainer/portainer -H tcp://$master_ip:2377 --swarm
+docker-machine ssh swarm-master \
+  docker run --name=portainer -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer
+
+# Setup the swarm visualizer
+docker-machine ssh swarm-master \
+  docker run -it -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock manomarks/visualizer
+
 
 # Create and join the workers
 for worker in $swarm_nodes; do
