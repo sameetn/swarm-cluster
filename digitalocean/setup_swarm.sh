@@ -13,7 +13,12 @@ docker-machine create \
   swarm-master
 master_ip=$(docker-machine ip swarm-master)
 
-echo "Initializing the swarm mode"
+echo "Setup a DNS record for the swarm-master"
+command -v doctl >/dev/null 2>&1 && \
+  doctl compute domain records create tmsapp.us --record-data $master_ip \
+    --record-name swarm-master --record-type A
+
+echo "Initializing the swarm master"
 docker-machine ssh swarm-master docker swarm init --advertise-addr $master_ip
 
 echo "Setting up Portainer for controlling the swarm"
@@ -39,3 +44,8 @@ for worker in $swarm_nodes; do
   docker-machine ssh $worker docker swarm join --token $join_token $master_ip:2377
 done
 
+echo "Swarm cluster setup complete ...... You can use the following URLs"
+echo "------------------------------------------"
+echo "| Manage    ===> http://$master_ip:9000  |"
+echo "| Visualize ===> http://$master_ip:8080  |"
+echo "------------------------------------------"
