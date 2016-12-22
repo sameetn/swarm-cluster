@@ -23,7 +23,7 @@ docker-machine ssh swarm-master docker swarm init --advertise-addr $master_ip
 
 echo "Setting up Portainer for controlling the swarm"
 docker-machine ssh swarm-master \
-  docker run --name=portainer -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer
+  docker run --name=portainer -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer --swarm
 
 echo "Setting up a Swarm visualizer for visualizing the cluster per node"
 docker-machine ssh swarm-master \
