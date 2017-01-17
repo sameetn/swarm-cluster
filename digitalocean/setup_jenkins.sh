@@ -21,3 +21,7 @@ docker-machine ssh jenkins-master 'wget -q -O - https://pkg.jenkins.io/debian-st
 docker-machine ssh jenkins-master 'echo "deb https://pkg.jenkins.io/debian-stable binary/" >> /etc/apt/sources.list'
 docker-machine ssh jenkins-master 'apt-get -y update'
 docker-machine ssh jenkins-master 'apt-get -y install jenkins'
+
+# Install nodejs
+docker-machine ssh jenkins-master 'curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh'
+docker-machine ssh jenkins-master 'chmod +x ./nodesource_setup.sh && ./nodesource_setup.sh && apt-get install nodejs'
