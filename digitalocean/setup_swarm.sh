@@ -23,11 +23,11 @@ docker-machine ssh swarm-master docker swarm init --advertise-addr $master_ip
 
 echo "Setting up Portainer for controlling the swarm"
 docker-machine ssh swarm-master \
-  docker run --name=portainer -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer --swarm
+  docker run --name=portainer -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer
 
 echo "Setting up a Swarm visualizer for visualizing the cluster per node"
 docker-machine ssh swarm-master \
-  docker run -it -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock manomarks/visualizer
+  docker run --name=visualizer -it -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock manomarks/visualizer
 
 join_token=$(docker-machine ssh swarm-master docker swarm join-token -q worker)
 echo "Join token is ${join_token}"
