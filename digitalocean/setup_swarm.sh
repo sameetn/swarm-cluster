@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+echo "------------------------------------------"
+echo "Setting up the swarm cluster"
+echo "------------------------------------------"
+
 # Run the settings for DigitalOcean
 [ -f ~/bin/settings_do.sh ] && source ~/bin/settings_do.sh
 swarm_nodes="swarm-node-1 swarm-node-2"

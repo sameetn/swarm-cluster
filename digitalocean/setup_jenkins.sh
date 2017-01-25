@@ -1,3 +1,7 @@
+echo "------------------------------------------"
+echo "Setting up jenkins"
+echo "------------------------------------------"
+
 # Run the settings for DigitalOcean
 [ -f ~/bin/settings_do.sh ] && source ~/bin/settings_do.sh
 
@@ -29,3 +33,7 @@ docker-machine ssh jenkins-master 'usermod -a -G docker jenkins'
 # Install nodejs
 docker-machine ssh jenkins-master 'curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh'
 docker-machine ssh jenkins-master 'chmod +x ./nodesource_setup.sh && ./nodesource_setup.sh && apt-get install nodejs'
+
+# Create jenkins keys and copy those to the swarm manager
+docker-machine ssh jenkins-master "su - jenkins -c 'ssh-keygen -f ~/id_rsa -t rsa -N \"\"'"
+docker-machine ssh jenkins-master "cat ~jenkins/.ssh/id_rsa.pub | ssh root@swarm-master.tmsapp.us 'cat >> .ssh/authorized_keys'"
