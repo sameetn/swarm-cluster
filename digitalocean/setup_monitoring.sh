@@ -1,3 +1,7 @@
+echo "------------------------------------------"
+echo "Setting up monitoring with Prometheus"
+echo "------------------------------------------"
+
 docker \
   network create --driver overlay monitoring
 
