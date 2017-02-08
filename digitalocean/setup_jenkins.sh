@@ -23,8 +23,8 @@ command -v doctl >/dev/null 2>&1 && \
 # Install Jenkins using apt-get
 docker-machine ssh jenkins-master 'wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | apt-key add -'
 docker-machine ssh jenkins-master 'echo "deb https://pkg.jenkins.io/debian-stable binary/" >> /etc/apt/sources.list'
-docker-machine ssh jenkins-master 'apt-get -y update'
-docker-machine ssh jenkins-master 'apt-get -y install jenkins'
+docker-machine ssh jenkins-master 'apt-get -qq -y update'
+docker-machine ssh jenkins-master 'apt-get -qq -y install jenkins'
 
 # Add jenkins to the docker group
 docker-machine ssh jenkins-master 'chown -R root:docker /var/lib/docker'
@@ -32,8 +32,9 @@ docker-machine ssh jenkins-master 'usermod -a -G docker jenkins'
 
 # Install nodejs
 docker-machine ssh jenkins-master 'curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh'
-docker-machine ssh jenkins-master 'chmod +x ./nodesource_setup.sh && ./nodesource_setup.sh && apt-get install nodejs'
+docker-machine ssh jenkins-master 'chmod +x ./nodesource_setup.sh && ./nodesource_setup.sh && apt-get -qq -y install nodejs'
 
 # Create jenkins keys and copy those to the swarm manager
-docker-machine ssh jenkins-master "su - jenkins -c 'ssh-keygen -f ~/id_rsa -t rsa -N \"\"'"
-docker-machine ssh jenkins-master "cat ~jenkins/.ssh/id_rsa.pub | ssh root@swarm-master.tmsapp.us 'cat >> .ssh/authorized_keys'"
+docker-machine ssh jenkins-master "su - jenkins -c 'mkdir ~/.ssh && ssh-keygen -t rsa -f ~/.ssh/id_rsa -N \"\" && chmod -R 700 ~/.ssh'"
+jenkins_key=$(docker-machine ssh jenkins-master cat ~jenkins/.ssh/id_rsa.pub)
+docker-machine ssh swarm-master "echo $jenkins_key >> ~/.ssh/authorized_keys"

@@ -49,7 +49,7 @@ for worker in $swarm_nodes; do
 done
 
 echo "Swarm cluster setup complete ...... You can use the following URLs"
-echo "------------------------------------------"
+echo "---------------------------------------------"
 echo "| Manage    ===> http://$master_ip:9000  |"
 echo "| Visualize ===> http://$master_ip:8080  |"
-echo "------------------------------------------"
+echo "---------------------------------------------"
