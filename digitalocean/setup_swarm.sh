@@ -4,6 +4,8 @@ echo "------------------------------------------"
 echo "Setting up the swarm cluster"
 echo "------------------------------------------"
 
+export DROPLET_SIZE=512mb
+
 # Run the settings for DigitalOcean
 [ -f ~/bin/settings_do.sh ] && source ~/bin/settings_do.sh
 swarm_nodes="swarm-node-1 swarm-node-2"
@@ -12,7 +14,7 @@ echo "Creating the master"
 docker-machine create \
   -d digitalocean \
   --digitalocean-access-token=$DO_ACCESS_TOKEN \
-  --digitalocean-size 1gb \
+  --digitalocean-size $DROPLET_SIZE \
   --digitalocean-ssh-key-fingerprint=$DO_KEY \
   swarm-master
 master_ip=$(docker-machine ip swarm-master)
@@ -42,7 +44,7 @@ for worker in $swarm_nodes; do
   docker-machine create \
     -d digitalocean \
     --digitalocean-access-token=$DO_ACCESS_TOKEN \
-    --digitalocean-size 1gb \
+    --digitalocean-size $DROPLET_SIZE \
     --digitalocean-ssh-key-fingerprint=$DO_KEY \
     ${worker}
   docker-machine ssh $worker docker swarm join --token $join_token $master_ip:2377

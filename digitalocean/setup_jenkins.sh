@@ -10,7 +10,7 @@ echo "Creating jenkins master"
 docker-machine create \
   -d digitalocean \
   --digitalocean-access-token=$DO_ACCESS_TOKEN \
-  --digitalocean-size 1gb \
+  --digitalocean-size 512mb \
   --digitalocean-ssh-key-fingerprint=$DO_KEY \
   jenkins-master
 master_ip=$(docker-machine ip jenkins-master)
